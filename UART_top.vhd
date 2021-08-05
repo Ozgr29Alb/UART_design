@@ -16,15 +16,15 @@ end UART_top;
 
 architecture Behavioral of UART_top is
 
-  signal txStart  : std_logic              := '0';
-  constant second : integer                := 200000000;
-  signal seccntr  : integer range 0 to second := 0;
-  signal d_in     : std_logic_vector(7 downto 0):="10100101";
+  signal txStart  : std_logic                    := '0';
+  constant second : integer                      := 200000000;
+  signal seccntr  : integer range 0 to second    := 0;
+  signal d_in     : std_logic_vector(7 downto 0) := "10100101";
 
   component uart is
     port (clk      : in  std_logic;
           rst      : in  std_logic;
-          din      : in std_logic_vector(7 downto 0);
+          din      : in  std_logic_vector(7 downto 0);
           tx_start : in  std_logic;
           tx_out   : out std_logic;
           tx_done  : out std_logic
@@ -41,21 +41,26 @@ architecture Behavioral of UART_top is
   end component;
   attribute mark_debug : string;
 
-  signal Dout   : std_logic_vector(7 downto 0); 
-  signal txDone : std_logic := '0';
-  signal rxDone : std_logic := '0';
-  signal txOut  : std_logic := '0';
-  signal rxIn   : std_logic := '0';
+  signal Dout         : std_logic_vector(7 downto 0);
+  signal receivedData : std_logic_vector(7 downto 0);
+  signal dataSend     : std_logic_vector(7 downto 0) := "10100101";
+  signal txDone       : std_logic                    := '0';
+  signal rxDone       : std_logic                    := '0';
+  signal txOut        : std_logic                    := '0';
+  signal rxIn         : std_logic                    := '0';
 
-  attribute mark_debug of txOut  : signal is "true";
-  attribute mark_debug of rxIn   : signal is "true";
-  attribute mark_debug of txDone : signal is "true";
-  attribute mark_debug of rxDone : signal is "true";
-  attribute mark_debug of Dout   : signal is "true";
+  attribute mark_debug of txOut        : signal is "true";
+  attribute mark_debug of rxIn         : signal is "true";
+  attribute mark_debug of txDone       : signal is "true";
+  attribute mark_debug of rxDone       : signal is "true";
+  attribute mark_debug of Dout         : signal is "true";
+  attribute mark_debug of receivedData : signal is "true";
+  attribute mark_debug of dataSend     : signal is "true";
+
 begin
   oTxOut <= txOut;
   rxIn   <= iRxIn;
-  dout  <= Dout;
+  dout   <= Dout;
   uartt : process(clock)
   begin
     if (rising_edge(clock)) then
@@ -67,25 +72,47 @@ begin
     end if;
   end process;
 
-  TX : uart
+
+  uart_rcv_1 : entity work.uart_rcv
+    port map (
+      start_clk => '0',
+      clk       => clock,
+      dout      => receivedData,
+      rx        => rxIn,
+      rx_done   => rxDone
+      );
+
+  uart_1 : entity work.uart
     port map (
       clk      => clock,
       rst      => reset,
+      din      => dataSend,
       tx_start => txStart,
       tx_out   => txOut,
       tx_done  => txDone
       );
 
 
-  RX : uart_rcv
-    port map (
-      clk     => clock,
-      dout    => d_out,
-      rx      => rxIn,
-      rx_done => rxDone
-      );
 
 
-                                                     
+  -- TX : uart
+  --   port map (
+  --     clk      => clock,
+  --     rst      => reset,
+  --     tx_start => txStart,
+  --     tx_out   => txOut,
+  --     tx_done  => txDone
+  --     );
+
+
+  -- RX : uart_rcv
+  --   port map (
+  --     clk     => clock,
+  --     dout    => d_out,
+  --     rx      => rxIn,
+  --     rx_done => rxDone
+  --     );
+
+
+
 end Behavioral;
-
