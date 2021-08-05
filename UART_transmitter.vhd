@@ -1,13 +1,21 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.std_logic_arith.all;
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+--use IEEE.NUMERIC_STD.ALL;
 
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx leaf cells in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
 
 entity uart is
     
     Generic ( clk_frq : integer := 100e6;
               baud: integer := 115200;
               stopbit: integer :=2
+              --din: std_logic_vector := "10100101"
               );
               
     Port ( clk : in STD_LOGIC;
@@ -55,11 +63,12 @@ if (rising_edge(clk)) then
 		--begin
 			-- tx_o	<= '0';---- decide what the clock should be
 			if (bittimer = c_bittimerlim-1) then--if (rising_edge(clk)) then
-				state				<=data;    -- check if the start bit is activated, if it is check every bit rate for 8 times
-				tx_out				<= shreg(0);
-				shreg(7)			<= shreg(0);
+				state				<=data;--    -- check if the start bit is activated, if it is check every bit rate for 8 times
+				tx_out				<= shreg(0);--    if (uart_rxd = 0) then
+				shreg(7)			<= shreg(0);--        if (rising_edge(
 				shreg(6 downto 0)	<= shreg(7 downto 1);--    -- start bit is not activated
-				
+				-- shreg(7 downto 1) 	<= shreg(6 downto 0);--    else
+				-- shreg(0)			<= shreg(7);end Behavioral;
 				bittimer			<= 0;
 			else
 				bittimer			<= bittimer + 1;
@@ -67,10 +76,12 @@ if (rising_edge(clk)) then
 			
 		when data =>
 		
-			
+			-- tx_o	<= shreg(0);
+		
 			if (bitcntr = 7) then
 				if (bittimer = c_bittimerlim-1) then
-					
+					-- shreg(7 downto 1) 	<= shreg(6 downto 0);
+					-- shreg(0)			<= shreg(7);
 					bitcntr				<= 0;
 					state				<= stop;
 					tx_out				<= '1';
