@@ -14,11 +14,11 @@ entity uart_rcv is
 
   generic (clk_frq : integer := 100e6;
            baud    : integer := 115200;
-           stopbit : integer := 2
+           stopbit : integer := 1
 
            );
 
-  port (start_clk : inout std_logic;
+  port (--start_clk : inout std_logic;
         clk       : in    std_logic;
         dout      : out   std_logic_vector(7 downto 0);
         rx        : in    std_logic;
@@ -57,26 +57,26 @@ begin
           rx_done <= '0';
           bitcntr <= 0;
 
-          if (starttimer = starttimerlim -1) then
-            if (rx = '0') then
+          if (rx ='0') then
+            --if (rx = '0') then
               state <= start;
 
 
-            end if;
-          else
-            starttimer <= starttimer +1;
+            --end if;
+         -- else
+           -- starttimer <= starttimer +1;
           end if;
         when start =>
           if (bittimer = (c_bittimerlim*3 / 2)-1) then  -- start state'e ilk geçildiği andan 3/2 bittime sonrası ilk bitin(D0) ortasına denk gelir diye düşündüm)
             state    <= data;
             dout(0)  <= rx;
             bittimer <= 0;
+            bitcntr <= 1;
           else
             bittimer <= bittimer + 1;
           end if;
 
         when data =>
-
 
 
           if (bitcntr = 7) then
