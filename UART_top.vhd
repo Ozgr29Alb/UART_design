@@ -5,11 +5,12 @@ use IEEE.std_logic_arith.all;
 
 entity UART_top is
   port (clock  : in  std_logic;
-        reset  : in  std_logic;
-        d_out  : out std_logic_vector(7 downto 0);
+        --reset  : in  std_logic;
+        --d_out  : out std_logic_vector(7 downto 0);
         --txStart  :  in std_logic;
         oTxOut : out std_logic;
         iRxIn  : in  std_logic
+        --forDebug: out std_logic_vector(7 downto 0)
         );
 
 end UART_top;
@@ -23,7 +24,7 @@ architecture Behavioral of UART_top is
 
   component uart is
     port (clk      : in  std_logic;
-          rst      : in  std_logic;
+          --rst      : in  std_logic;
           din      : in  std_logic_vector(7 downto 0);
           tx_start : in  std_logic;
           tx_out   : out std_logic;
@@ -41,7 +42,7 @@ architecture Behavioral of UART_top is
   end component;
   attribute mark_debug : string;
 
-  signal Dout         : std_logic_vector(7 downto 0);
+  --signal Dout         : std_logic_vector(7 downto 0);
   signal receivedData : std_logic_vector(7 downto 0);
   signal dataSend     : std_logic_vector(7 downto 0) := "10100101";
   signal txDone       : std_logic                    := '0';
@@ -49,18 +50,27 @@ architecture Behavioral of UART_top is
   signal txOut        : std_logic                    := '0';
   signal rxIn         : std_logic                    := '0';
 
+
   attribute mark_debug of txOut        : signal is "true";
   attribute mark_debug of rxIn         : signal is "true";
   attribute mark_debug of txDone       : signal is "true";
   attribute mark_debug of rxDone       : signal is "true";
-  attribute mark_debug of Dout         : signal is "true";
+  --attribute mark_debug of Dout         : signal is "true";
   attribute mark_debug of receivedData : signal is "true";
   attribute mark_debug of dataSend     : signal is "true";
 
+  attribute KEEP : string;
+  --attribute KEEP of Dout: signal is "True";
+  attribute KEEP of receivedData: signal is "True";
+  attribute KEEP of dataSend: signal is "True";
 begin
   oTxOut <= txOut;
-  rxIn   <= iRxIn;
-  dout   <= Dout;
+  rxIn <= iRxIn;
+  --dout   <= Dout;
+  --d_out  <= Dout;
+  --d_out <= "00000000";
+  --forDebug <= receivedData OR dataSend OR Dout;
+ 
   uartt : process(clock)
   begin
     if (rising_edge(clock)) then
@@ -75,7 +85,7 @@ begin
 
   uart_rcv_1 : entity work.uart_rcv
     port map (
-      start_clk => '0',
+      --start_clk => '0',
       clk       => clock,
       dout      => receivedData,
       rx        => rxIn,
@@ -85,7 +95,7 @@ begin
   uart_1 : entity work.uart
     port map (
       clk      => clock,
-      rst      => reset,
+      --rst      => reset,
       din      => dataSend,
       tx_start => txStart,
       tx_out   => txOut,
