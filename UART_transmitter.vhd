@@ -14,12 +14,12 @@ entity uart is
     
     Generic ( clk_frq : integer := 100e6;
               baud: integer := 115200;
-              stopbit: integer :=2
+              stopbit: integer :=1
               --din: std_logic_vector := "10100101"
               );
               
     Port ( clk : in STD_LOGIC;
-           rst : in STD_LOGIC;
+          -- rst : in STD_LOGIC;
            din: in std_logic_vector(7 downto 0);
            --uart_rxd : in STD_LOGIC;
            tx_start: in std_logic;
