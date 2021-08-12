@@ -18,9 +18,9 @@ end UART_top;
 architecture Behavioral of UART_top is
 
   signal txStart  : std_logic                    := '0';
-  constant second : integer                      := 200000000;
+  constant second : integer                      := 10; --200000000;
   signal seccntr  : integer range 0 to second    := 0;
-  signal d_in     : std_logic_vector(7 downto 0) := "10100101";
+  signal d_in     : std_logic_vector(7 downto 0) := "10000001";
 
   component uart is
     port (clk      : in  std_logic;
@@ -44,7 +44,7 @@ architecture Behavioral of UART_top is
 
   --signal Dout         : std_logic_vector(7 downto 0);
   signal receivedData : std_logic_vector(7 downto 0);
-  signal dataSend     : std_logic_vector(7 downto 0) := "10100101";
+  signal dataSend     : std_logic_vector(7 downto 0) := "10000001";
   signal txDone       : std_logic                    := '0';
   signal rxDone       : std_logic                    := '0';
   signal txOut        : std_logic                    := '0';
@@ -70,27 +70,28 @@ begin
   --d_out  <= Dout;
   --d_out <= "00000000";
   --forDebug <= receivedData OR dataSend OR Dout;
- 
+
+
+new_data: process(clock)
+begin
+if (rising_edge(clock)) then
+    if (txDone = '1') then
+        dataSend <= dataSend(dataSend'high-3 downto 0) & dataSend(dataSend'high downto 5);
+    end if;
+end if;
+end process;
+
   uartt : process(clock)
   begin
     if (rising_edge(clock)) then
       if (seccntr = second - 1) then
         txStart <= not txStart;
+        seccntr <= 0;
       else
         seccntr <= seccntr +1;
       end if;
     end if;
   end process;
-
-
-  uart_rcv_1 : entity work.uart_rcv
-    port map (
-      --start_clk => '0',
-      clk       => clock,
-      dout      => receivedData,
-      rx        => rxIn,
-      rx_done   => rxDone
-      );
 
   uart_1 : entity work.uart
     port map (
@@ -101,6 +102,17 @@ begin
       tx_out   => txOut,
       tx_done  => txDone
       );
+
+  uart_rcv_1 : entity work.uart_rcv
+    port map (
+      --start_clk => '0',
+      clk       => clock,
+      dout      => receivedData,
+      rx        => rxIn,
+      rx_done   => rxDone
+      );
+
+
 
 
 
