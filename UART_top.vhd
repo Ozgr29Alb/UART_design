@@ -17,10 +17,33 @@ end UART_top;
 
 architecture Behavioral of UART_top is
 
+
+ 
+
   signal txStart  : std_logic                    := '0';
   constant second : integer                      := 10; --200000000;
   signal seccntr  : integer range 0 to second    := 0;
   signal d_in     : std_logic_vector(7 downto 0) := "10000001";
+
+-- PHASE CLOCK SIGNALS
+signal clk_30 : std_logic;
+signal clk_60 : std_logic;
+signal reset  : std_logic := '0';
+signal locked : std_logic;
+
+component clk_wiz_0
+port
+ (-- Clock in ports
+  -- Clock out ports
+  clk_30d          : out    std_logic;
+  clk_60d          : out    std_logic;
+  -- Status and control signals
+  reset             : in     std_logic;
+  locked            : out    std_logic;
+  clk_in1           : in     std_logic
+ );
+end component;
+
 
   component uart is
     port (clk      : in  std_logic;
@@ -58,6 +81,9 @@ architecture Behavioral of UART_top is
   --attribute mark_debug of Dout         : signal is "true";
   attribute mark_debug of receivedData : signal is "true";
   attribute mark_debug of dataSend     : signal is "true";
+attribute mark_debug of clk_30        : signal is "true"; 
+attribute mark_debug of clk_60        : signal is "true"; 
+
 
   attribute KEEP : string;
   --attribute KEEP of Dout: signal is "True";
@@ -80,7 +106,16 @@ if (rising_edge(clock)) then
     end if;
 end if;
 end process;
-
+  
+  clk_wiz: clk_wiz_0
+     port map( clk_30d => clk_30,
+               clk_60d => clk_60,
+               reset   => reset,
+               locked  => locked,
+               clk_in1 => clock);
+        
+  
+  
   uartt : process(clock)
   begin
     if (rising_edge(clock)) then
@@ -95,7 +130,7 @@ end process;
 
   uart_1 : entity work.uart
     port map (
-      clk      => clock,
+      clk      => clk_30,
       --rst      => reset,
       din      => dataSend,
       tx_start => txStart,
@@ -106,7 +141,7 @@ end process;
   uart_rcv_1 : entity work.uart_rcv
     port map (
       --start_clk => '0',
-      clk       => clock,
+      clk       => clk_60,
       dout      => receivedData,
       rx        => rxIn,
       rx_done   => rxDone
