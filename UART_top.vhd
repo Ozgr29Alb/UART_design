@@ -30,6 +30,7 @@ signal clk_30 : std_logic;
 signal clk_60 : std_logic;
 signal reset  : std_logic := '0';
 signal locked : std_logic;
+signal clkHigh : std_logic; 
 
 component clk_wiz_0
 port
@@ -44,6 +45,16 @@ port
  );
 end component;
 
+component clk_wiz_2
+port
+ (-- Clock in ports
+  -- Clock out ports
+  clk_high          : out    std_logic;
+  -- Status and control signals
+  locked            : out    std_logic;
+  clk_in1           : in     std_logic
+ );
+end component;
 
   component uart is
     port (clk      : in  std_logic;
@@ -90,17 +101,17 @@ attribute mark_debug of clk_60        : signal is "true";
   attribute KEEP of receivedData: signal is "True";
   attribute KEEP of dataSend: signal is "True";
 begin
-  oTxOut <= txOut;
-  rxIn <= iRxIn;
+  oTxOut     <= txOut;
+  rxIn       <= iRxIn;
   --dout   <= Dout;
   --d_out  <= Dout;
   --d_out <= "00000000";
   --forDebug <= receivedData OR dataSend OR Dout;
 
-
-new_data: process(clock)
+  
+new_data: process(clk_30)
 begin
-if (rising_edge(clock)) then
+if (rising_edge(clk_30)) then
     if (txDone = '1') then
         dataSend <= dataSend(dataSend'high-3 downto 0) & dataSend(dataSend'high downto 5);
     end if;
@@ -114,11 +125,19 @@ end process;
                locked  => locked,
                clk_in1 => clock);
         
+  clk_high : clk_wiz_2
+   port map ( 
+  -- Clock out ports  
+   clk_high => clkHigh,
+  -- Status and control signals                
+   locked => locked,
+   -- Clock in ports
+   clk_in1 => clock
+ );
   
-  
-  uartt : process(clock)
+  uartt : process(clk_30)
   begin
-    if (rising_edge(clock)) then
+    if (rising_edge(clk_30)) then
       if (seccntr = second - 1) then
         txStart <= not txStart;
         seccntr <= 0;
