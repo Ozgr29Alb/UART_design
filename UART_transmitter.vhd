@@ -13,7 +13,7 @@ use IEEE.std_logic_arith.all;
 entity uart is
     
     Generic ( clk_frq : integer := 100e6;
-              baud: integer := 115200;
+              baud: integer := 460800;--115200;
               stopbit: integer :=1
               --din: std_logic_vector := "10100101"
               );
@@ -31,8 +31,8 @@ entity uart is
 end uart;
 
 architecture Behavioral of uart is
-    constant c_bittimerlim 	: integer := clk_frq/baud;
-    constant c_stopbitlim 	: integer := (clk_frq/baud)*stopbit;
+    constant c_bittimerlim 	: integer := clk_frq/(baud*10);
+    constant c_stopbitlim 	: integer := (clk_frq/(baud*10))*stopbit;
     
     type states is (idle,start,data,stop);
     signal state: states := idle;
