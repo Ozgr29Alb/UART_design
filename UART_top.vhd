@@ -28,9 +28,9 @@ architecture Behavioral of UART_top is
 -- PHASE CLOCK SIGNALS
 signal clk_30 : std_logic;
 signal clk_60 : std_logic;
-signal reset  : std_logic := '0';
-signal locked : std_logic;
 signal clkHigh : std_logic; 
+
+
 
 component clk_wiz_0
 port
@@ -38,23 +38,12 @@ port
   -- Clock out ports
   clk_30d          : out    std_logic;
   clk_60d          : out    std_logic;
-  -- Status and control signals
-  reset             : in     std_logic;
-  locked            : out    std_logic;
+  clk_high          : out    std_logic;
   clk_in1           : in     std_logic
  );
 end component;
 
-component clk_wiz_2
-port
- (-- Clock in ports
-  -- Clock out ports
-  clk_high          : out    std_logic;
-  -- Status and control signals
-  locked            : out    std_logic;
-  clk_in1           : in     std_logic
- );
-end component;
+
 
   component uart is
     port (clk      : in  std_logic;
@@ -108,33 +97,40 @@ begin
   --d_out <= "00000000";
   --forDebug <= receivedData OR dataSend OR Dout;
 
-  
-new_data: process(clk_30)
-begin
-if (rising_edge(clk_30)) then
-    if (txDone = '1') then
-        dataSend <= dataSend(dataSend'high-3 downto 0) & dataSend(dataSend'high downto 5);
-    end if;
-end if;
-end process;
-  
-  clk_wiz: clk_wiz_0
-     port map( clk_30d => clk_30,
-               clk_60d => clk_60,
-               reset   => reset,
-               locked  => locked,
-               clk_in1 => clock);
-        
-  clk_high : clk_wiz_2
+wizard : clk_wiz_0
    port map ( 
   -- Clock out ports  
+   clk_30d => clk_30,
+   clk_60d => clk_60,
    clk_high => clkHigh,
-  -- Status and control signals                
-   locked => locked,
    -- Clock in ports
    clk_in1 => clock
  );
   
+--new_data: process(clk_30)
+--begin
+--if (rising_edge(clk_30)) then
+--    if (txDone = '1') then
+--        dataSend <= dataSend(dataSend'high-3 downto 0) & dataSend(dataSend'high downto 5);
+--    end if;
+--end if;
+--end process;
+  
+new_datas: process(clk_30)
+begin
+if (rising_edge(clk_30)) then
+    if (txDone = '1') then
+        if (dataSend <= "10000001") then
+            dataSend <= "10100101";
+       
+        elsif (dataSend <= "10100101") then
+            dataSend <= "10000001";
+        end if;
+    end if;
+end if;
+end process;
+    
+    
   uartt : process(clk_30)
   begin
     if (rising_edge(clk_30)) then
