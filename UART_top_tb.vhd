@@ -1,24 +1,3 @@
--------------------------------------------------------------------------------
--- Title      : Testbench for design "UART_top"
--- Project    :
--------------------------------------------------------------------------------
--- File       : UART_top_tb.vhd
--- Author     : osmant  <otutaysalgir@gmail.com>
--- Company    :
--- Created    : 2021-08-10
--- Last update: 2021-08-10
--- Platform   :
--- Standard   : VHDL'93/02
--------------------------------------------------------------------------------
--- Description:
--------------------------------------------------------------------------------
--- Copyright (c) 2021
--------------------------------------------------------------------------------
--- Revisions  :
--- Date        Version  Author  Description
--- 2021-08-10  1.0      otutaysalgir	Created
--------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
 
@@ -52,7 +31,7 @@ begin  -- architecture tb
 
   -- clock generation
   Clk <= not Clk after 10 ns;
-
+clock <= clk;
   -- waveform generation
   WaveGen_Proc: process
   begin
