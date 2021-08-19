@@ -13,7 +13,7 @@ use IEEE.std_logic_arith.all;
 entity uart_rcv is
 
   generic (clk_frq : integer := 100e6;
-           baud    : integer := 460800; --115200;
+           baud    : integer := 460800;  --115200;
            stopbit : integer := 1
 
            );
@@ -30,8 +30,8 @@ entity uart_rcv is
 end uart_rcv;
 
 architecture Behavioral of uart_rcv is
-  constant c_bittimerlim : integer := clk_frq/(baud*10);
-  constant c_stopbitlim  : integer := (clk_frq/(baud*10))*stopbit;
+  constant c_bittimerlim : integer := 800;-- 217;  --clk_frq/(baud);
+  constant c_stopbitlim  : integer := 800*stopbit;  --217*stopbit;  --(clk_frq/(baud))*stopbit;
   constant starttimerlim : integer := clk_frq/(baud*32);  -- ask what should be the freq that controls if the process is started
                                                           -- (bittime'dan 32 kat daha küçük bir zaman aralığı start state i gözlemlemek için yeterli olur
                                         -- dedim ama açıkcası bilmiyorum)
