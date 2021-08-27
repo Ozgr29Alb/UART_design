@@ -1,0 +1,98 @@
+library IEEE;
+use IEEE.Std_logic_1164.all;
+use IEEE.Numeric_Std.all;
+
+entity sampler_tb is
+end;
+
+architecture bench of sampler_tb is
+
+  component sampler
+      Port ( data : in STD_LOGIC;
+             reset : in STD_LOGIC;
+             clk : in STD_LOGIC;
+             valid: in std_logic;
+             done: in std_logic;
+             o_done : out STD_LOGIC);
+  end component;
+
+  signal data: STD_LOGIC;
+  signal reset: STD_LOGIC;
+  signal clk: STD_LOGIC;
+  signal valid: std_logic;
+  signal done: std_logic;
+  signal o_done: STD_LOGIC;
+  signal output: std_logic_vector(1 downto 0);
+  
+  constant clock_period: time := 10 ns;
+  signal stop_the_clock: boolean := False;
+
+begin
+
+  uut: sampler port map ( data   => data,
+                          reset  => reset,
+                          clk    => clk,
+                          valid  => valid,
+                          done   => done,
+                          o_done => o_done );
+
+  stimulus: process
+  begin
+  
+    valid <= '1';
+    done <= '0';
+
+
+    reset <= '1';
+    wait for 5 ns;
+    reset <= '0';
+    wait for 5 ns;
+    data <= '1';    
+    wait for 10 ns;
+    data <= '0';
+    wait for 10 ns;
+    data <= '1';
+    wait for 10 ns;
+    data <= '1';
+    wait for 10 ns;
+    data <= '0';
+    wait for 10 ns;
+    data <= '0';
+    wait for 10 ns;
+    data <= '1';
+    wait for 5 ns;
+    done <='1';
+    wait for 15 ns;
+    data <='1';    
+    output(0) <= o_done;
+    wait for 20 ns;
+    done <= '0';
+    wait for 3 ns;
+    data <= '0';
+    wait for 7 ns;
+    valid <= '1';
+    wait for 10 ns;
+    data <= '1';
+    wait for 10 ns;
+    data <= '0';
+    wait for 5 ns;
+    done <= '1';
+    wait for 20 ns;
+    output(1) <= o_done;
+    wait for 16 ns;
+    done <= '0';
+    wait for 200 ns;
+    stop_the_clock <= true;
+    wait;
+  end process;
+
+  clocking: process
+  begin
+    while not stop_the_clock loop
+      clk <= '0', '1' after clock_period / 2;
+      wait for clock_period;
+    end loop;
+    wait;
+  end process;
+
+end;
