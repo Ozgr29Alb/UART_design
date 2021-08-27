@@ -13,7 +13,7 @@ use IEEE.std_logic_arith.all;
 entity uart is
     
     Generic ( clk_frq : integer := 100e6;
-              baud: integer := 460800;  --115200;
+              baud: integer := 115200*100;  --115200;
               stopbit: integer :=1
               --din: std_logic_vector := "10100101"
               );
@@ -31,13 +31,13 @@ entity uart is
 end uart;
 
 architecture Behavioral of uart is
-    constant c_bittimerlim 	: integer := 800;  -- 217;  --clk_frq/(baud);
-    constant c_stopbitlim 	: integer := 800*stopbit;  --217*stopbit;  --(clk_frq/(baud))*stopbit;
+    constant c_bittimerlim 	: integer := clk_frq/(baud);
+    constant c_stopbitlim 	: integer := (clk_frq/(baud))*stopbit;
     
     type states is (idle,start,data,stop);
     signal state: states := idle;
        
-    signal bittimer : integer range 0 to c_stopbitlim := 0;
+    signal bittimer : integer range 0 to c_bittimerlim := 0;
     signal bitcntr	: integer range 0 to 7 := 0;
     signal shreg	: std_logic_vector (7 downto 0) := (others => '0');
 begin
@@ -48,9 +48,9 @@ if (rising_edge(clk)) then
 	case state is
 	
 		when idle =>
-		
+		    shreg   <=   "00000000";
 			tx_out			<= '1';
-			tx_done	<= '0';
+			tx_done	        <= '0';
 			bitcntr			<= 0;
 			
 			if (tx_start = '1') then
@@ -60,6 +60,8 @@ if (rising_edge(clk)) then
 			end if;    
 		    
 		when start =>--process(clk,uart_rxd)
+		
+		
 		--begin
 			-- tx_o	<= '0';---- decide what the clock should be
 			if (bittimer = c_bittimerlim-1) then--if (rising_edge(clk)) then
@@ -104,11 +106,12 @@ if (rising_edge(clk)) then
 			end if;
 		
 		when stop =>
-		
+		    
 			if (bittimer = c_stopbitlim-1) then
 				state				<= idle;
-				tx_done		<= '1';
+				tx_done       		<= '1';
 				bittimer			<= 0;
+			--shreg   <=   "00000000";
 			else
 				bittimer			<= bittimer + 1;				
 			end if;		
